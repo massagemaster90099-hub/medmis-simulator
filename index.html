@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedMIS Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .success {
+            background: #27ae60;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            color: white;
+            display: none;
+        }
+        .patient-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .required {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 MedMIS Simulator <span class="badge">152-ФЗ</span></h1>
+        
+        <div class="patient-info">
+            <strong>Пациент:</strong> <span id="patient-name">Загрузка...</span><br>
+            <strong>Дата рождения:</strong> <span id="patient-dob">...</span>
+        </div>
+
+        <form id="mis-form">
+            <div class="form-group">
+                <label>Жалобы <span class="required">*</span></label>
+                <textarea id="complaint" required placeholder="Опишите жалобы пациента..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Аллергия <span class="required">*</span></label>
+                <select id="allergy" required>
+                    <option value="">Выберите...</option>
+                    <option value="нет">Нет</option>
+                    <option value="пенициллин">Пенициллин</option>
+                    <option value="аспирин">Аспирин</option>
+                    <option value="латекс">Латекс</option>
+                    <option value="йод">Йод</option>
+                    <option value="другое">Другое</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Диагноз (МКБ-10) <span class="required">*</span></label>
+                <input type="text" id="diagnosis" required placeholder="Например: J06.9">
+            </div>
+
+            <div class="form-group">
+                <label>План лечения</label>
+                <textarea id="treatment" placeholder="Назначения, рекомендации..."></textarea>
+            </div>
+
+            <button type="submit">💾 Сохранить в МИС</button>
+        </form>
+
+        <div class="success" id="success-message">
+            ✅ Данные сохранены! (Демо-режим)
+        </div>
+    </div>
+
+    <script>
+        // Загрузка случайного пациента из patients.json
+        let patients = [];
+        let currentPatient = null;
+
+        fetch('patients.json')
+            .then(response => response.json())
+            .then(data => {
+                patients = data;
+                loadRandomPatient();
+            })
+            .catch(err => {
+                console.error('Ошибка загрузки patients.json:', err);
+                document.getElementById('patient-name').textContent = 'Ошибка загрузки';
+            });
+
+        function loadRandomPatient() {
+            if (patients.length === 0) return;
+            currentPatient = patients[Math.floor(Math.random() * patients.length)];
+            document.getElementById('patient-name').textContent = 
+                `${currentPatient.last_name} ${currentPatient.first_name} ${currentPatient.patronymic}`;
+            document.getElementById('patient-dob').textContent = currentPatient.date_of_birth;
+        }
+
+        // Обработка формы
+        document.getElementById('mis-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Собираем данные
+            const formData = {
+                patient_id: currentPatient.id,
+                complaint: document.getElementById('complaint').value,
+                allergy: document.getElementById('allergy').value,
+                diagnosis: document.getElementById('diagnosis').value,
+                treatment: document.getElementById('treatment').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // В демо-режиме просто показываем сообщение
+            console.log('Сохранённые данные:', formData);
+            document.getElementById('success-message').style.display = 'block';
+            
+            // Через 3 секунды скрываем и загружаем нового пациента
+            setTimeout(() => {
+                document.getElementById('success-message').style.display = 'none';
+                document.getElementById('mis-form').reset();
+                loadRandomPatient();
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
