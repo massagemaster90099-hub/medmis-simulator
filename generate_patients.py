@@ -2,16 +2,18 @@ import json
 import random
 from datetime import datetime, timedelta
 
-# --- КОНФИГУРАЦИЯ ---
-NUM_PATIENTS = 20  # Количество пациентов
+# === КОНФИГУРАЦИЯ ===
+NUM_PATIENTS = 20
 
-# Синтетические данные (никаких реальных совпадений)
-FIRST_NAMES = ["Иван", "Петр", "Сергей", "Алексей", "Дмитрий", 
-               "Анна", "Елена", "Ольга", "Наталья", "Мария"]
-LAST_NAMES = ["Иванов", "Петров", "Сидоров", "Смирнов", "Кузнецов", 
-              "Попов", "Васильев", "Михайлов", "Новиков", "Федоров"]
-PATRONYMICS = ["Иванович", "Петрович", "Сергеевич", "Алексеевич", "Дмитриевич", 
-               "Ивановна", "Петровна", "Сергеевна", "Алексеевна", "Дмитриевна"]
+# ⚠️ РАЗДЕЛЕНО ПО ПОЛУ — НЕ МЕНЯТЬ!
+MALE_FIRST_NAMES = ["Иван", "Петр", "Сергей", "Алексей", "Дмитрий", "Андрей", "Николай", "Владимир", "Александр", "Михаил"]
+FEMALE_FIRST_NAMES = ["Анна", "Елена", "Ольга", "Наталья", "Мария", "Екатерина", "Татьяна", "Светлана", "Ирина", "Юлия"]
+
+MALE_PATRONYMICS = ["Иванович", "Петрович", "Сергеевич", "Алексеевич", "Дмитриевич", "Андреевич", "Николаевич", "Владимирович", "Александрович", "Михайлович"]
+FEMALE_PATRONYMICS = ["Ивановна", "Петровна", "Сергеевна", "Алексеевна", "Дмитриевна", "Андреевна", "Николаевна", "Владимировна", "Александровна", "Михайловна"]
+
+LAST_NAMES_MALE = ["Иванов", "Петров", "Сидоров", "Смирнов", "Кузнецов", "Попов", "Васильев", "Михайлов", "Новиков", "Федоров"]
+LAST_NAMES_FEMALE = ["Иванова", "Петрова", "Сидорова", "Смирнова", "Кузнецова", "Попова", "Васильева", "Михайлова", "Новикова", "Федорова"]
 
 COMPLAINTS = [
     "Головная боль, головокружение",
@@ -55,24 +57,40 @@ def generate_date_of_birth(min_age=18, max_age=80):
 def generate_patient_id(index):
     return f"P{index:04d}"
 
+def generate_patient(index, sex):
+    """Генерирует пациента с корректным согласованием пола"""
+    
+    # ⚠️ КЛЮЧЕВОЙ МОМЕНТ — ВЫБОР ПО ПОЛУ
+    if sex == "М":
+        first_name = random.choice(MALE_FIRST_NAMES)
+        patronymic = random.choice(MALE_PATRONYMICS)
+        last_name = random.choice(LAST_NAMES_MALE)
+    else:  # sex == "Ж"
+        first_name = random.choice(FEMALE_FIRST_NAMES)
+        patronymic = random.choice(FEMALE_PATRONYMICS)
+        last_name = random.choice(LAST_NAMES_FEMALE)
+    
+    return {
+        "id": generate_patient_id(index),
+        "last_name": last_name,
+        "first_name": first_name,
+        "patronymic": patronymic,
+        "date_of_birth": generate_date_of_birth(),
+        "sex": sex,
+        "complaint": random.choice(COMPLAINTS),
+        "diagnosis": random.choice(DIAGNOSES),
+        "allergy": random.choice(ALLERGIES),
+        "treatment": random.choice(TREATMENTS),
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "is_synthetic": True
+    }
+
 def main():
     patients = []
     
     for i in range(1, NUM_PATIENTS + 1):
-        patient = {
-            "id": generate_patient_id(i),
-            "last_name": random.choice(LAST_NAMES),
-            "first_name": random.choice(FIRST_NAMES),
-            "patronymic": random.choice(PATRONYMICS),
-            "date_of_birth": generate_date_of_birth(),
-            "sex": random.choice(["М", "Ж"]),
-            "complaint": random.choice(COMPLAINTS),
-            "diagnosis": random.choice(DIAGNOSES),
-            "allergy": random.choice(ALLERGIES),
-            "treatment": random.choice(TREATMENTS),
-            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "is_synthetic": True
-        }
+        sex = random.choice(["М", "Ж"])
+        patient = generate_patient(i, sex)
         patients.append(patient)
     
     with open('patients.json', 'w', encoding='utf-8') as f:
@@ -81,6 +99,12 @@ def main():
     print(f"✅ Готово! Сгенерировано {NUM_PATIENTS} пациентов.")
     print("📄 Файл: patients.json")
     print("🔒 Все данные синтетические (152-ФЗ соблюдён)")
+    print("⚠️ Пол согласован с фамилией и отчеством")
+    
+    # === ПРОВЕРКА ПЕРВЫХ 5 ПАЦИЕНТОВ ===
+    print("\n📋 Проверка первых 5 пациентов:")
+    for p in patients[:5]:
+        print(f"  {p['last_name']} {p['first_name']} {p['patronymic']} | Пол: {p['sex']}")
 
 if __name__ == "__main__":
     main()
