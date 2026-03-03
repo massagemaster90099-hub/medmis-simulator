@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedMIS Simulator — Тренажёр МИС</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --bg: #F8FAFC;
+            --card: #FFFFFF;
+            --text: #1E293B;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--error), #DC2626);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        /* Patient Card */
+        .patient-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .patient-card h3 {
+            font-size: 16px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .patient-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .allergy-warning {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            border: 1px solid var(--warning);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .allergy-warning svg {
+            width: 20px;
+            height: 20px;
+            color: var(--warning);
+        }
+
+        .allergy-warning span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #92400E;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section h4 {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-section h4 svg {
+            width: 18px;
+            height: 18px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: var(--error);
+            margin-left: 3px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: var(--bg);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-light);
+        }
+
+        /* Button */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Messages */
+        .success-message {
+            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+            border: 1px solid var(--success);
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-top: 20px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message svg {
+            width: 24px;
+            height: 24px;
+            color: var(--success);
+            margin-right: 10px;
+        }
+
+        .success-message span {
+            font-size: 15px;
+            font-weight: 600;
+            color: #065F46;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #FEE2E2, #FECACA);
+            border: 1px solid var(--error);
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-top: 20px;
+            animation: shake 0.3s ease;
+        }
+
+        .error-message strong {
+            color: #991B1B;
+            font-size: 15px;
+        }
+
+        .error-message br {
+            margin: 5px 0;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-card svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card.primary svg { color: var(--primary); }
+        .stat-card.success svg { color: var(--success); }
+        .stat-card.warning svg { color: var(--warning); }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .patient-card,
+            .form-card {
+                padding: 20px;
+            }
+
+            .patient-info {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                🏥 MedMIS Simulator
+                <span class="badge">152-ФЗ</span>
+            </h1>
+            <p>Тренажёр медицинских информационных систем для студентов-медиков</p>
+        </div>
+
+        <!-- Patient Card -->
+        <div class="patient-card">
+            <h3>📋 Данные пациента</h3>
+            <div class="patient-info">
+                <div class="info-item">
+                    <span class="info-label">ФИО</span>
+                    <span class="info-value" id="patient-name">Загрузка...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Дата рождения</span>
+                    <span class="info-value" id="patient-dob">...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Пол</span>
+                    <span class="info-value" id="patient-sex">...</span>
+                </div>
+            </div>
+            <div class="allergy-warning" id="allergy-warning" style="display: none;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span id="allergy-text">Аллергия: ...</span>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="form-card">
+            <form id="mis-form">
+                <!-- Section 1: Chief Complaint -->
+                <div class="form-section">
+                    <h4>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Основная информация
+                    </h4>
+                    <div class="form-group">
+                        <label>Жалобы <span class="required">*</span></label>
+                        <textarea id="complaint" placeholder="Опишите жалобы пациента (например: головная боль, температура 38.5°C)..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Section 2: Medical History -->
+                <div class="form-section">
+                    <h4>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                        </svg>
+                        Анамнез
+                    </h4>
+                    <div class="form-group">
+                        <label>Аллергия <span class="required">*</span></label>
+                        <select id="allergy">
+                            <option value="">Выберите...</option>
+                            <option value="нет">Нет</option>
+                            <option value="пенициллин">Пенициллин</option>
+                            <option value="аспирин">Аспирин</option>
+                            <option value="латекс">Латекс</option>
+                            <option value="йод">Йод</option>
+                            <option value="другое">Другое</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section 3: Diagnosis & Treatment -->
+                <div class="form-section">
+                    <h4>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        Диагноз и лечение
+                    </h4>
+                    <div class="form-group">
+                        <label>Диагноз (МКБ-10) <span class="required">*</span></label>
+                        <input type="text" id="diagnosis" placeholder="Например: J06.9">
+                    </div>
+                    <div class="form-group">
+                        <label>План лечения</label>
+                        <textarea id="treatment" placeholder="Назначения, рекомендации, дозировки..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    Сохранить в МИС
+                </button>
+            </form>
+
+            <div class="success-message" id="success-message">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Данные сохранены! (Демо-режим)</span>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-container">
+            <div class="stat-card primary">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <div class="stat-value" id="stat-scenarios">0</div>
+                <div class="stat-label">Сценариев пройдено</div>
+            </div>
+            <div class="stat-card success">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="stat-value" id="stat-completed">0</div>
+                <div class="stat-label">Успешных</div>
+            </div>
+            <div class="stat-card warning">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div class="stat-value" id="stat-errors">0</div>
+                <div class="stat-label">Ошибок</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>MedMIS Simulator © 2026 | МИ ХГУ | <a href="https://github.com/massagemaster90099-hub/medmis-simulator" target="_blank">GitHub</a></p>
+        </div>
+    </div>
+
+    <script>
+        // === МЕТРИКИ ДЛЯ УМНИК ===
+        let errorCount = parseInt(localStorage.getItem('medmis_errors') || 0);
+        let scenarioCount = parseInt(localStorage.getItem('medmis_scenarios') || 0);
+        let completedCount = parseInt(localStorage.getItem('medmis_completed') || 0);
+
+        function updateStats() {
+            document.getElementById('stat-scenarios').textContent = scenarioCount;
+            document.getElementById('stat-errors').textContent = errorCount;
+            document.getElementById('stat-completed').textContent = completedCount;
+        }
+
+        function trackError() {
+            errorCount++;
+            localStorage.setItem('medmis_errors', errorCount);
+            updateStats();
+        }
+
+        function trackScenario(completed) {
+            scenarioCount++;
+            localStorage.setItem('medmis_scenarios', scenarioCount);
+            if (completed) {
+                completedCount++;
+                localStorage.setItem('medmis_completed', completedCount);
+            }
+            updateStats();
+        }
+
+        // === ЗАГРУЗКА ПАЦИЕНТА ===
+        let patients = [];
+        let currentPatient = null;
+
+        fetch('patients.json')
+            .then(response => response.json())
+            .then(data => {
+                patients = data;
+                loadRandomPatient();
+                updateStats();
+            })
+            .catch(err => {
+                console.error('Ошибка загрузки patients.json:', err);
+                document.getElementById('patient-name').textContent = 'Ошибка загрузки';
+            });
+
+        function loadRandomPatient() {
+            if (patients.length === 0) return;
+            currentPatient = patients[Math.floor(Math.random() * patients.length)];
+            document.getElementById('patient-name').textContent = 
+                `${currentPatient.last_name} ${currentPatient.first_name} ${currentPatient.patronymic}`;
+            document.getElementById('patient-dob').textContent = currentPatient.date_of_birth;
+            document.getElementById('patient-sex').textContent = currentPatient.sex === 'М' ? 'Мужской' : 'Женский';
+            
+            // Показываем предупреждение об аллергии
+            const allergyWarning = document.getElementById('allergy-warning');
+            const allergyText = document.getElementById('allergy-text');
+            if (currentPatient.allergy !== 'Нет') {
+                allergyWarning.style.display = 'flex';
+                allergyText.textContent = `Аллергия: ${currentPatient.allergy}`;
+            } else {
+                allergyWarning.style.display = 'none';
+            }
+        }
+
+        // === ВАЛИДАЦИЯ ФОРМЫ ===
+        function validateForm() {
+            const complaint = document.getElementById('complaint').value.trim();
+            const allergy = document.getElementById('allergy').value;
+            const diagnosis = document.getElementById('diagnosis').value.trim();
+            
+            const errors = [];
+            
+            if (!complaint) {
+                errors.push('❌ Поле "Жалобы" обязательно для заполнения');
+            }
+            
+            if (!allergy) {
+                errors.push('❌ Поле "Аллергия" обязательно (выберите "Нет" если отсутствует)');
+            }
+            
+            if (!diagnosis) {
+                errors.push('❌ Поле "Диагноз (МКБ-10)" обязательно');
+            } else if (!/^[A-Z]\d{2}\.\d?$/.test(diagnosis.toUpperCase())) {
+                errors.push('❌ Неверный формат МКБ-10 (пример: J06.9)');
+            }
+            
+            return errors;
+        }
+
+        // === ПРОВЕРКА НА АЛЛЕРГИЮ (КРИТИЧЕСКАЯ ОШИБКА) ===
+        function checkAllergy(patient, formData) {
+            if (patient.allergy !== 'Нет' && formData.allergy === 'нет') {
+                return {
+                    critical: true,
+                    message: `⚠️ КРИТИЧЕСКАЯ ОШИБКА: У пациента аллергия на ${patient.allergy}! Вы не указали это в форме.`
+                };
+            }
+            return null;
+        }
+
+        // === ОБРАБОТКА ОТПРАВКИ ФОРМЫ ===
+        document.getElementById('mis-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Удаляем старые ошибки
+            const oldErrors = document.querySelectorAll('.error-message');
+            oldErrors.forEach(el => el.remove());
+            
+            // Валидация полей
+            const validationErrors = validateForm();
+            
+            if (validationErrors.length > 0) {
+                trackError();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = '<strong>Ошибка сохранения:</strong><br>' + validationErrors.join('<br>');
+                this.parentNode.insertBefore(errorDiv, this.nextSibling);
+                return;
+            }
+            
+            // Сбор данных формы
+            const formData = {
+                patient_id: currentPatient.id,
+                complaint: document.getElementById('complaint').value,
+                allergy: document.getElementById('allergy').value,
+                diagnosis: document.getElementById('diagnosis').value,
+                treatment: document.getElementById('treatment').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Проверка на аллергию
+            const allergyError = checkAllergy(currentPatient, formData);
+            if (allergyError) {
+                trackError();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.background = 'linear-gradient(135deg, #FEE2E2, #FECACA)';
+                errorDiv.innerHTML = '<strong>' + allergyError.message + '</strong>';
+                this.parentNode.insertBefore(errorDiv, this.nextSibling);
+                return;
+            }
+            
+            // Успех
+            trackScenario(true);
+            console.log('Сохранённые данные:', formData);
+            document.getElementById('success-message').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('success-message').style.display = 'none';
+                document.getElementById('mis-form').reset();
+                loadRandomPatient();
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
